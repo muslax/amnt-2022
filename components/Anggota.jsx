@@ -12,12 +12,14 @@ import { generatePOSTData } from 'lib/utils';
 import ButtonSave from './ButtonSave';
 import ButtonCancel from './ButtonCancel';
 import ButtonDelete from './ButtonDelete';
+import isEqual from 'lodash.isequal';
 
 export default function Anggota ({ idr, editable }) {
     const { data, error } = useSWR(`/api/get?q=anggota&idr=${idr}`, fetchJson)
     const { mutate } = useSWRConfig()
     
     const [model, setModel] = useState(null);
+    const [proxy, setProxy] = useState(null);
     const [daftar, setDaftar] = useState([]);
     const [add, setAdd] = useState(false);
     
@@ -28,6 +30,10 @@ export default function Anggota ({ idr, editable }) {
         
         return () => {}
     }, [data])
+    
+    function isDirty() {
+        return ! isEqual(model, proxy)
+    }
     
     async function saveAnggota() {
         try {
@@ -84,10 +90,12 @@ export default function Anggota ({ idr, editable }) {
                                 if (a._id != a._idr) {
                                     if (! model) {
                                         setModel(a);
+                                        setProxy(a);
                                         setAdd(true)
                                     } else {
                                         setAdd(false)
                                         setModel(null)
+                                        setProxy(null)
                                     }
                                 }
                             }}
@@ -113,6 +121,7 @@ export default function Anggota ({ idr, editable }) {
                     <button 
                     onClick={e => {
                         setModel(newModel(idr))
+                        setProxy(newModel(idr))
                         setAdd(true)
                     }} 
                     className="h-9 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium px-4"
@@ -199,10 +208,11 @@ export default function Anggota ({ idr, editable }) {
                     <Row label="">
                         <div className="flex">
                             <div className="flex-grow">
-                                <ButtonSave clickHandler={saveAnggota} />
+                                <ButtonSave clickHandler={saveAnggota} dirty={isDirty()} />
                                 <ButtonCancel clickHandler={e => {
                                     setAdd(false)
                                     setModel(null)
+                                    setProxy(null)
                                 }} />
                             </div>
                             {model._id != 'NEW' && (

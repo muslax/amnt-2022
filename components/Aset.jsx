@@ -1,6 +1,7 @@
 import fetchJson from 'lib/fetchJson';
 import { NewAset } from 'lib/models';
 import { generatePOSTData } from 'lib/utils';
+import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
@@ -23,6 +24,10 @@ export default function Aset({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveAset() {
         try {
@@ -140,7 +145,7 @@ export default function Aset({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveAset} />}
+                        {editable && <ButtonSave clickHandler={saveAset} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

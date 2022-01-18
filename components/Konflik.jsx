@@ -1,6 +1,7 @@
 import fetchJson from 'lib/fetchJson';
 import { NewKonflik } from 'lib/models';
 import { generatePOSTData } from 'lib/utils';
+import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
@@ -23,6 +24,10 @@ export default function Konflik ({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveKonflik() {
         try {
@@ -69,7 +74,7 @@ export default function Konflik ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveKonflik} />}
+                        {editable && <ButtonSave clickHandler={saveKonflik} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

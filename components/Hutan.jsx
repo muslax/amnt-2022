@@ -13,12 +13,14 @@ import ButtonSave from './ButtonSave';
 import ButtonCancel from './ButtonCancel';
 import ButtonDelete from './ButtonDelete';
 import { NewHutan, NewIkan, NewTanaman, NewTernak } from 'lib/models';
+import isEqual from 'lodash.isequal';
 
 export default function Hutan ({ idr, editable }) {
     const { data, error } = useSWR(`/api/get?q=hutan&idr=${idr}`, fetchJson)
     const { mutate } = useSWRConfig()
     
     const [model, setModel] = useState(null);
+    const [proxy, setProxy] = useState(null);
     const [daftar, setDaftar] = useState([]);
     const [add, setAdd] = useState(false);
     
@@ -30,6 +32,10 @@ export default function Hutan ({ idr, editable }) {
         return () => {}
     }, [data, setDaftar])
     
+    function isDirty() {
+        return ! isEqual(model, proxy)
+    }
+    
     async function saveItem() {
         try {
             await fetchJson(`/api/post?q=save-hutan`, generatePOSTData(model))
@@ -39,6 +45,7 @@ export default function Hutan ({ idr, editable }) {
         }
         setAdd(false)
         setModel(null)
+        setProxy(null)
     }
     
     async function deleteItem(id) {
@@ -50,6 +57,7 @@ export default function Hutan ({ idr, editable }) {
         }
         setAdd(false)
         setModel(null)
+        setProxy(null)
     }
     
     return (
@@ -79,10 +87,12 @@ export default function Hutan ({ idr, editable }) {
                             if (model && model._id == 'NEW') return
                             if (! model) {
                                 setModel(item);
+                                setProxy(item)
                                 setAdd(true)
                             } else {
                                 setAdd(false)
                                 setModel(null)
+                                setProxy(null)
                             }
                         }}
                         >
@@ -103,6 +113,7 @@ export default function Hutan ({ idr, editable }) {
                     <button 
                     onClick={e => {
                         setModel(NewHutan(idr))
+                        setProxy(NewHutan(idr))
                         setAdd(true)
                     }} 
                     className="h-9 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium px-4"
@@ -134,10 +145,11 @@ export default function Hutan ({ idr, editable }) {
                     <Row label="">
                         <div className="flex">
                             <div className="flex-grow">
-                                <ButtonSave clickHandler={saveItem} />
+                                <ButtonSave clickHandler={saveItem} dirty={isDirty()} />
                                 <ButtonCancel clickHandler={e => {
                                     setAdd(false)
                                     setModel(null)
+                                    setProxy(null)
                                 }} />
                             </div>
                             {model._id != 'NEW' && (

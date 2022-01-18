@@ -8,17 +8,46 @@ import Textual from './Textual';
 import { ModelResponden } from 'lib/models';
 import fetchJson from 'lib/fetchJson';
 import { generatePOSTData } from 'lib/utils';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import isEqual from 'lodash.isequal';
 
-export default function Responden ({ responden, editable }) {
+export default function Responden ({ user, responden, editable }) {
     const [model, setModel] = useState(responden);
+    const [enums, setEnums] = useState([]);
+    const { data, error } = useSWR(`/api/get?q=enums`, fetchJson)
+    
     const { mutate } = useSWRConfig()
+    
+    useEffect(() => {
+        if (data) {
+            let array =[]
+            data.forEach(d => {
+                array.push(d.fullname)
+            })
+            
+            setEnums(array)
+        }
+        
+        return () => {}
+    }, [data, setEnums])
+    
+    function isDirty() {
+        return ! isEqual(model, responden)
+    }
     
     async function saveResponden(e) {
         e.preventDefault();
         
         try {
+            // Umur
+            if (Date.parse(model.tanggalLahir)) {
+                const ldate = new Date(model.tanggalLahir).getFullYear()
+                const ynow = new Date().getFullYear()
+                const umur = ynow - ldate
+                model.umur = umur
+            }
+            
             const rs = await fetchJson("/api/post?q=save-responden", generatePOSTData(model))
             mutate(`/api/get?q=responden&id=${responden._id}`)
             mutate(`/api/get?q=anggota&idr=${responden._id}`)
@@ -35,6 +64,13 @@ export default function Responden ({ responden, editable }) {
                     <Row label="Tanggal wawancara:">
                         <Tanggal  model={model} setModel={setModel} field="tanggal" />
                     </Row>
+                    <Row label="Enumerator:">
+                        <Select 
+                        target={model} setTarget={setModel} field="enumerator" defaultValue={user.fullname}
+                        options={enums} 
+                        />
+                    </Row>
+                    
                     <Row label="1. Nama lengkap:">
                         <Textual model={model} setModel={setModel} field="nama" />
                     </Row>
@@ -185,7 +221,7 @@ export default function Responden ({ responden, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveResponden} />}
+                        {editable && <ButtonSave clickHandler={saveResponden} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

@@ -1,6 +1,7 @@
 import fetchJson from 'lib/fetchJson';
 import { NewNelayan } from 'lib/models';
 import { generatePOSTData } from 'lib/utils';
+import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
@@ -52,6 +53,10 @@ export default function Nelayan ({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveNelayan() {
         try {
@@ -234,7 +239,7 @@ export default function Nelayan ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveNelayan} />}
+                        {editable && <ButtonSave clickHandler={saveNelayan} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

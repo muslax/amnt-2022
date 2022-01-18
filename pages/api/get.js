@@ -27,40 +27,54 @@ export default withSession(async (req, res) => {
   return task (req, res);
 })
 
+
+
+ACCEPTED_QUERIES['enums'] = async function (req, res) {
+  try {
+    const { db } = await connect();
+    const { idr } = req.query;
+    const rs = await db.collection('users').find({ type: 'enumerator' },{ projection: {fullname: 1} }).sort('fullname').toArray();
+    return res.json( rs );
+  } catch (error) {
+    return res.status(error.status || 500).end(error.message)
+  }
+}
+
 ACCEPTED_QUERIES['daftar'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { db } = await connect();
         const { id } = req.query;
         
-        const rs = await db.collection('responden').aggregate([
-            { $match: {}},
-            { $lookup: {
-                from: 'users',
-                localField: '_user',
-                foreignField: '_id',
-                as: 'user'
-            }},
-            { $unwind: "$user" },
-            { $project: {
-                _user: 1,
-                nama: 1,
-                desa: 1,
-                tanggal: 1,
-                // "user.fullname": 1,
-                'enumerator': "$user.fullname",
-            }}
-        ]).toArray()
-
-        // const rs = await db.collection('responden').find(
-        //     {},
-        //     { projection: {
+        // const rs = await db.collection('responden').aggregate([
+        //     { $match: {}},
+        //     { $lookup: {
+        //         from: 'users',
+        //         localField: '_user',
+        //         foreignField: '_id',
+        //         as: 'user'
+        //     }},
+        //     { $unwind: "$user" },
+        //     { $project: {
         //         _user: 1,
         //         nama: 1,
         //         desa: 1,
         //         tanggal: 1,
+        //         // "user.fullname": 1,
+        //         'enumerator': "$user.fullname",
         //     }}
-        // ).toArray()
+        // ]).toArray()
+
+        const rs = await db.collection('responden').find(
+            {},
+            { projection: {
+                _user: 1,
+                nama: 1,
+                desa: 1,
+                tanggal: 1,
+                enumerator: 1,
+            }}
+        ).toArray()
 
         return res.json( rs );
     } catch (error) {
@@ -160,6 +174,23 @@ ACCEPTED_QUERIES['hutan'] = async function (req, res) {
   
       const rs = await db.collection('hutan').find({ _idr: idr }).toArray();
       console.log(rs)
+  
+      return res.json( rs );
+    } catch (error) {
+      return res.status(error.status || 500).end(error.message)
+    }
+}
+
+ACCEPTED_QUERIES['ekonomi'] = async function (req, res) {
+    try {
+      const { db } = await connect();
+      const { id } = req.query;
+      
+      if (!id) return res.status(404).json({ message: 'Not found' })
+      
+      const rs = await db.collection('ekonomi').findOne({ _id: id });
+  
+      if (!rs) return res.status(404).json({ message: 'Not found' })
   
       return res.json( rs );
     } catch (error) {

@@ -10,6 +10,7 @@ import Row from "./Row";
 import Select from './Select';
 import Tanggal from './Tanggal';
 import Textual from './Textual';
+import isEqual from 'lodash.isequal';
 
 export default function Persepsi ({ idr, editable }) {
     const { mutate } = useSWRConfig()
@@ -23,6 +24,10 @@ export default function Persepsi ({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function savePersepsi() {
         try {
@@ -160,6 +165,20 @@ export default function Persepsi ({ idr, editable }) {
                         <Textual model={model} setModel={setModel} field="infoDampakAdat" />
                     </Row>
                     
+                    
+                    <Row label="9x. Dampak paling signifikan:">
+                        <Select 
+                            target={model} setTarget={setModel} field="dampakSignifikan" 
+                            options={[
+                                'Ekonomi',
+                                'Lingkungan',
+                                'Sosial budaya',
+                                'Kesehatan masyarakat',
+                                'Lainnya',
+                            ]} 
+                        />
+                    </Row>
+                    
                     <Row label="98. Kerjasama / gotongroyong di masyarakat:">
                         <Select 
                             target={model} setTarget={setModel} field="gotongroyong" 
@@ -204,7 +223,7 @@ export default function Persepsi ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={savePersepsi} />}
+                        {editable && <ButtonSave clickHandler={savePersepsi} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

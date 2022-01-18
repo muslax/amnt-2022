@@ -32,19 +32,19 @@ export default function DataResponden () {
         <Layout title="Data Responden">
             <h1 className="text-2xl pb-4 border-b border-gray-400">{responden.nama}</h1>
             
-            <Responden responden={responden} editable={responden._user == user._id}/>
-            <Anggota idr={responden._id} editable={responden._user == user._id}/>
-            <Ekonomi responden={responden} editable={responden._user == user._id}/>
-            <Aset idr={responden._id} editable={responden._user == user._id}/>
-            <Tanaman idr={responden._id} editable={responden._user == user._id}/>
-            <Ternak idr={responden._id} editable={responden._user == user._id}/>
-            <Ikan idr={responden._id} editable={responden._user == user._id}/>
-            <Hutan idr={responden._id} editable={responden._user == user._id}/>
-            <Nelayan idr={responden._id} editable={responden._user == user._id}/>
-            <Konflik idr={responden._id} editable={responden._user == user._id}/>
-            <Kesmas idr={responden._id} editable={responden._user == user._id}/>
-            <Observasi idr={responden._id} editable={responden._user == user._id}/>
-            <Persepsi idr={responden._id} editable={responden._user == user._id}/>
+            <Responden user={user} responden={responden} editable={responden._user == user._id}/>
+            <Anggota    idr={responden._id} editable={responden._user == user._id}/>
+            <Ekonomi    idr={responden._id} editable={responden._user == user._id}/>
+            <Aset       idr={responden._id} editable={responden._user == user._id}/>
+            <Tanaman    idr={responden._id} editable={responden._user == user._id}/>
+            <Ternak     idr={responden._id} editable={responden._user == user._id}/>
+            <Ikan       idr={responden._id} editable={responden._user == user._id}/>
+            <Hutan      idr={responden._id} editable={responden._user == user._id}/>
+            <Nelayan    idr={responden._id} editable={responden._user == user._id}/>
+            <Konflik    idr={responden._id} editable={responden._user == user._id}/>
+            <Kesmas     idr={responden._id} editable={responden._user == user._id}/>
+            <Observasi  idr={responden._id} editable={responden._user == user._id}/>
+            <Persepsi   idr={responden._id} editable={responden._user == user._id}/>
         </Layout>
     )
 }

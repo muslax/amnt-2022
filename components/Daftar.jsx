@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import fetchJson from "lib/fetchJson";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import Link from 'next/link';
+import ButtonDelete from './ButtonDelete';
+import { generatePOSTData } from 'lib/utils';
 
 export default function DaftarResponden({ user }) {
     const { data, error } = useSWR(`/api/get?q=daftar`, fetchJson)
@@ -21,7 +23,7 @@ export default function DaftarResponden({ user }) {
         <>
             <div className="mt-16 mb-20">
                 <h2 className="text-lg font-bold">My Data</h2>
-                <Table data={mine} />
+                <Table data={mine} can={true} />
             </div>
             
             <div className="">
@@ -32,7 +34,21 @@ export default function DaftarResponden({ user }) {
     )
 }
 
-function Table ({ data }) {
+function Table ({ data, can = false }) {
+    const [selected, setSelected] = useState(null);
+    
+    async function deleteResponden() {
+        if (!setSelected) return
+        
+        try {
+            await fetchJson(`/api/post?q=delete-responden&id=${selected}`, generatePOSTData({}))
+            mutate(`/api/get?q=daftar`)
+        } catch (error) {
+            alert("ERROR")
+        }
+        
+        setSelected(null)
+    }
     
     if (data.length == 0) return (
         <table className="w-full text-sm border-t-2 border-gray-600">
@@ -50,14 +66,33 @@ function Table ({ data }) {
             {data.map((r,i) => (
                 <tr key={`key-${i}`} className="border-b">
                     <td className="p-2 w-8">{i + 1}</td>
-                    <td className="p-2 w-24 whitespace-nowrap">{r.tanggal}</td>
-                    <td className="p-2 w-1/2">
+                    <td className="p-2 w-24 whitespace-nowrap">{r.tanggal ? r.tanggal : '---'}</td>
+                    <td className="p-2 w-1/3">
+                        {can && (
+                            <input 
+                                type="checkbox" className='w-4 h-4 mr-2' 
+                                checked={selected == r._id}
+                                onChange={e => {
+                                    if (e.target.checked) setSelected(r._id)
+                                    else setSelected(null)
+                                }}
+                            />
+                        )}
                         <Link href={`/data/${r._id}`}>
                             <a className="text-blue-500 hover:underline">{r.nama}</a>
                         </Link>
                     </td>
                     <td className="p-2">{r.desa}</td>
-                    <td className="p-2">{r.enumerator}</td>
+                    {! can && <td className="p-2">{r.enumerator}</td> }
+                    {can && (
+                        <td className="p-1 text-right">
+                                <button
+                                disabled={selected != r._id}
+                                className='text-red-500 disabled:text-gray-300'
+                                onClick={deleteResponden}
+                                >Delete</button>
+                        </td>
+                    )}
                 </tr>
             ))}
             </tbody>

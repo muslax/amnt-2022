@@ -5,19 +5,37 @@ import Row from "./Row";
 import Select from './Select';
 import Tanggal from './Tanggal';
 import Textual from './Textual';
-import { ModelResponden } from 'lib/models';
+import { ModelResponden, NewEkonomi } from 'lib/models';
 import fetchJson from 'lib/fetchJson';
 import { generatePOSTData } from 'lib/utils';
 import ButtonSave from './ButtonSave';
+import isEqual from 'lodash.isequal';
+import useSWR, { useSWRConfig } from 'swr';
 
-export default function Ekonomi ({ responden, editable }) {
-    const [model, setModel] = useState(responden);
+export default function Ekonomi ({ idr, editable }) {
+    const { mutate } = useSWRConfig()
+    const { data, error } = useSWR(`/api/get?q=ekonomi&id=${idr}`, fetchJson)
+    const [model, setModel] = useState(NewEkonomi('NEW'));
+    
+    useEffect(() => {
+        if (data) {
+            setModel(data)
+        }
+        
+        return () => {}
+    }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveEkonomi(e) {
-        e.preventDefault();
-        
         try {
-            const rs = await fetchJson("/api/post?q=save-ekonomi", generatePOSTData(model))
+            await fetchJson("/api/post?q=save-ekonomi", generatePOSTData({
+                idr: idr,
+                data: model
+            }))
+            mutate(`/api/get?q=ekonomi&id=${idr}`)
         } catch (error) {
             alert("ERROR")
         }
@@ -153,7 +171,7 @@ export default function Ekonomi ({ responden, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveEkonomi} />}
+                        {editable && <ButtonSave clickHandler={saveEkonomi} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import withSession from "lib/session";
 import { connect } from "lib/mongodb";
-import { ModelResponden, NewAset, NewKesmas, NewKonflik, NewNelayan, NewObservasi, NewPersepsi } from "lib/models";
+import { ModelResponden, NewAnggota, NewAset, NewEkonomi, NewKesmas, NewKonflik, NewNelayan, NewObservasi, NewPersepsi, NewResponden } from "lib/models";
 
 const ACCEPTED_QUERIES = {}
 
@@ -34,14 +34,18 @@ ACCEPTED_QUERIES['new-name'] = async function (req, res) {
         const user = req.session.get("user");
         const { nama } = req.body
         const id = ObjectId().toString()
-        const model = ModelResponden
+        const model = NewResponden(nama, user)
         model._id = id
-        model._user = user._id
-        model.nama = nama
         
         await session.withTransaction(async () => {
             await db.collection('responden').insertOne(model)
             
+            const kk = NewAnggota(id)
+            kk._id = id
+            kk.nama = nama
+            await db.collection('anggota').insertOne(kk)
+            
+            await db.collection('ekonomi').insertOne(NewEkonomi(id))
             await db.collection('aset').insertOne(NewAset(id))
             await db.collection('nelayan').insertOne(NewNelayan(id))
             await db.collection('konflik').insertOne(NewKonflik(id))
@@ -67,10 +71,12 @@ ACCEPTED_QUERIES['save-responden'] = async function (req, res) {
                 { _id: _id },
                 { $set: {
                     tanggal: req.body.tanggal,
+                    enumerator: req.body.enumerator,
                     desa: req.body.desa,
                     gender: req.body.gender,
                     nama: req.body.nama,
                     tanggalLahir: req.body.tanggalLahir,
+                    umur: req.body.umur,
                     statusKeluarga: req.body.statusKeluarga,
                     statusMarital: req.body.statusMarital,
                     pendidikan: req.body.pendidikan,
@@ -96,7 +102,7 @@ ACCEPTED_QUERIES['save-responden'] = async function (req, res) {
                         hubungan: req.body.statusKeluarga,
                         gender: req.body.gender,
                         marital: req.body.statusMarital,
-                        umur: '',
+                        umur: req.body.umur,
                         melekHuruf: '',
                         pendidikan: req.body.pendidikan,
                         pekerjaanUtama: req.body.pekerjaanUtama,
@@ -111,7 +117,7 @@ ACCEPTED_QUERIES['save-responden'] = async function (req, res) {
                     hubungan: req.body.statusKeluarga,
                     gender: req.body.nama,
                     marital: req.body.statusMarital,
-                    umur: req.body.nama,
+                    umur: req.body.umur,
                     melekHuruf: '',
                     pendidikan: req.body.pendidikan,
                     pekerjaanUtama: req.body.pekerjaanUtama,
@@ -121,45 +127,6 @@ ACCEPTED_QUERIES['save-responden'] = async function (req, res) {
             
             return res.json({ message: 'OK' })
         })
-    } catch (error) {
-        return res.status(error.status || 500).end(error.message)
-    }
-}
-
-ACCEPTED_QUERIES['save-ekonomi'] = async function (req, res) {
-    const { db, client } = await connect()
-    try {
-        const user = req.session.get("user");
-        const { _id } = req.body
-        await db.collection('responden').findOneAndUpdate(
-            { _id: _id },
-            { $set: {
-                // pekerjaanUtama: req.body.pekerjaanUtama,
-                // pekerjaanLain: req.body.pekerjaanLain,
-                minatKerjaDiAMNT: req.body.minatKerjaDiAMNT,
-                pernahMelamarAMNT: req.body.pernahMelamarAMNT,
-                minatPelatihan: req.body.minatPelatihan,
-                jenisPelatihan: req.body.jenisPelatihan,
-                pendapatanPerBulan: req.body.pendapatanPerBulan,
-                sumberPendapatan: req.body.sumberPendapatan,
-                belanjaPerBulan: req.body.belanjaPerBulan,
-                belanjaKonsumsi: req.body.belanjaKonsumsi,
-                belanjaKesehatan: req.body.belanjaKesehatan,
-                belanjaPendidikan: req.body.belanjaPendidikan,
-                belanjaKomunikasi: req.body.belanjaKomunikasi,
-                belanjaTransportasi: req.body.belanjaTransportasi,
-                belanjaSewaRumah: req.body.belanjaSewaRumah,
-                belanjaListrik: req.body.belanjaListrik,
-                belanjaCicilan: req.body.belanjaCicilan,
-                belanjaLainnya: req.body.belanjaLainnya,
-                tabungan: req.body.tabungan,
-                jumlahTabungan: req.body.jumlahTabungan,
-                tempatTabungan: req.body.tempatTabungan,
-                kecukupanPendapatan: req.body.kecukupanPendapatan,
-                caraPemenuhanKebutuhan: req.body.caraPemenuhanKebutuhan,
-            }}
-        );
-        return res.json({ message: 'OK' })
     } catch (error) {
         return res.status(error.status || 500).end(error.message)
     }
@@ -329,6 +296,37 @@ ACCEPTED_QUERIES['save-hutan'] = async function (req, res) {
     }
 }
 
+ACCEPTED_QUERIES['delete-responden'] = async function (req, res) {
+    const { db, client } = await connect()
+    const session = client.startSession()
+    try {
+        await session.withTransaction(async () => {
+            const user = req.session.get("user");
+            const { id } = req.query
+            
+            await db.collection('aset',).deleteOne({ _id: id })
+            await db.collection('ekonomi').deleteOne({ _id: id })
+            await db.collection('nelayan',).deleteOne({ _id: id })
+            await db.collection('kesmas',).deleteOne({ _id: id })
+            await db.collection('konflik',).deleteOne({ _id: id })
+            await db.collection('observasi').deleteOne({ _id: id })
+            await db.collection('persepsi',).deleteOne({ _id: id })
+            
+            await db.collection('anggota').deleteMany({ _idr: id })
+            await db.collection('ternak').deleteMany({ _idr: id })
+            await db.collection('ikan').deleteMany({ _idr: id })
+            await db.collection('hutan',).deleteMany({ _idr: id })
+            await db.collection('tanaman').deleteMany({ _idr: id })
+            
+            await db.collection('responden').deleteOne({ _id: id })
+            
+            return res.json({ message: 'OK' })
+        })
+    } catch (error) {
+        return res.status(error.status || 500).end(error.message)
+    }
+}
+
 ACCEPTED_QUERIES['delete-anggota'] = async function (req, res) {
     const { db, client } = await connect()
     try {
@@ -394,30 +392,40 @@ ACCEPTED_QUERIES['delete-hutan'] = async function (req, res) {
     }
 }
 
+ACCEPTED_QUERIES['save-ekonomi'] = async function (req, res) {
+    const { db } = await connect()
+    try {
+        const user = req.session.get("user");
+        const { idr, data } = req.body
+        const fields = { ...data }
+        delete fields._id
+        
+        if (data._id == 'NEW') {
+            await db.collection('ekonomi').insertOne({
+                _id: idr,
+                ...fields
+            })
+        } else {
+            await db.collection('ekonomi').findOneAndUpdate(
+                {_id: data._id},
+                { $set: fields }
+            )
+        }
+        
+        return res.json({ message: 'OK' })
+    } catch (error) {
+        return res.status(error.status || 500).end(error.message)
+    }
+}
+
 ACCEPTED_QUERIES['save-aset'] = async function (req, res) {
     const { db } = await connect()
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            jenis: data.jenis,
-            luas: data.luas,
-            ruang: data.ruang,
-            statusRumah: data.statusRumah,
-            buktiStatus: data.buktiStatus,
-            luasTanah: data.luasTanah,
-            luasBangunan: data.luasBangunan,
-            luasProduktif: data.luasProduktif,
-            luasNonProduktif: data.luasNonProduktif,
-            luasLainnya: data.luasLainnya,
-            mobil: data.mobil,
-            motor: data.motor,
-            perahuMesin: data.perahuMesin,
-            perahuNonMesin: data.perahuNonMesin,
-            traktor: data.traktor,
-            sumberListrik: data.sumberListrik,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('aset').insertOne({
                 _id: idr,
@@ -441,28 +449,9 @@ ACCEPTED_QUERIES['save-nelayan'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            polaMencari: data.polaMencari,
-            frekuensi: data.frekuensi,
-            lokasi: data.lokasi,
-            hasil: data.hasil,
-            perbedaan: data.perbedaan,
-            infoPerbedaan: data.infoPerbedaan,
-            dampakTailing: data.dampakTailing,
-            kualitasHasil: data.kualitasHasil,
-            infoKualitas: data.infoKualitas,
-            jikaTailingMengganggu: data.jikaTailingMengganggu,
-            minatUbahPencaharian: data.minatUbahPencaharian,
-            infoMinatUbahPencaharian: data.infoMinatUbahPencaharian,
-            minatPelatihan: data.minatPelatihan,
-            infoMinatPelatihan: data.infoMinatPelatihan,
-            minatMenjadiNelayanLaut: data.minatMenjadiNelayanLaut,
-            infoMinatMenjadiNelayanLaut: data.infoMinatMenjadiNelayanLaut,
-            yangDilakukanAMNT: data.yangDilakukanAMNT,
-            harapanUntukAMNT: data.harapanUntukAMNT,
-            harapanUntukPemerintah: data.harapanUntukPemerintah,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('nelayan').insertOne({
                 _id: idr,
@@ -486,14 +475,9 @@ ACCEPTED_QUERIES['save-konflik'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            konflik: data.konflik,
-            infoKonflik: data.infoKonflik,
-            konflikHorisontal: data.konflikHorisontal,
-            konflikVertikal: data.konflikVertikal,
-            tokohResolusi: data.tokohResolusi,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('konflik').insertOne({
                 _id: idr,
@@ -517,27 +501,9 @@ ACCEPTED_QUERIES['save-kesmas'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            penyakit: data.penyakit,
-            stunting: data.stunting,
-            infoStunting: data.infoStunting,
-            wabah: data.wabah,
-            tempatBerobat: data.tempatBerobat,
-            aksesFaskes: data.aksesFaskes,
-            biaya: data.biaya,
-            kisbpjs: data.kisbpjs,
-            kualitasLayanan: data.kualitasLayanan,
-            sumberAirMinum: data.sumberAirMinum,
-            merebusAirMinum: data.merebusAirMinum,
-            konsumsiPerHari: data.konsumsiPerHari,
-            sumberAirBersih: data.sumberAirBersih,
-            masalahAir: data.masalahAir,
-            penyelesaianMasalahAir: data.penyelesaianMasalahAir,
-            saranaBAB: data.saranaBAB,
-            saranaLimbahCair: data.saranaLimbahCair,
-            pengolahanSampah: data.pengolahanSampah,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('kesmas').insertOne({
                 _id: idr,
@@ -561,28 +527,9 @@ ACCEPTED_QUERIES['save-observasi'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            genangan: data.genangan,
-            jentik: data.jentik,
-            vektor: data.vektor,
-            kebersihan: data.kebersihan,
-            kelompokSampah: data.kelompokSampah,
-            plafon: data.plafon,
-            dinding: data.dinding,
-            lantai: data.lantai,
-            jendelaKamar: data.jendelaKamar,
-            jendelaKeluarga: data.jendelaKeluarga,
-            ventilasi: data.ventilasi,
-            pencahayaan: data.pencahayaan,
-            konsumsiSayur: data.konsumsiSayur,
-            olahraga: data.olahraga,
-            kebersihanDiri: data.kebersihanDiri,
-            perokok: data.perokok,
-            tempatMerokok: data.tempatMerokok,
-            konsumsiMiras: data.konsumsiMiras,
-            dampakMiras: data.dampakMiras,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('observasi').insertOne({
                 _id: idr,
@@ -606,30 +553,9 @@ ACCEPTED_QUERIES['save-persepsi'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { idr, data } = req.body
-        const fields = {
-            tahuRencana: data.tahuRencana,
-            sumberTahu: data.sumberTahu,
-            manfaatEkonomi: data.manfaatEkonomi,
-            pekerjaanKasar: data.pekerjaanKasar,
-            infoPekerjaanKasar: data.infoPekerjaanKasar,
-            pilihanPekerjaan: data.pilihanPekerjaan,
-            infoPilihanPekerjaan: data.infoPilihanPekerjaan,
-            dampakLingkungan: data.dampakLingkungan,
-            infoDampakLingkungan: data.infoDampakLingkungan,
-            dampakKesehatan: data.dampakKesehatan,
-            infoDampakKesehatan: data.infoDampakKesehatan,
-            dampakLayananPublik: data.dampakLayananPublik,
-            infoDampakLayananPublik: data.infoDampakLayananPublik,
-            dampakAdat: data.dampakAdat,
-            infoDampakAdat: data.infoDampakAdat,
-            gotongroyong: data.gotongroyong,
-            infoGotongroyong: data.infoGotongroyong,
-            dukungan: data.dukungan,
-            infoDukungan: data.infoDukungan,
-            aktivitas: data.aktivitas,
-            infoAktivitas: data.infoAktivitas,
-        }
-        console.log(data._id)
+        const fields = { ...data }
+        delete fields._id
+        
         if (data._id == 'NEW') {
             await db.collection('persepsi').insertOne({
                 _id: idr,

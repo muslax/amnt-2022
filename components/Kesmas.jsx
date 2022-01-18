@@ -1,6 +1,7 @@
 import fetchJson from 'lib/fetchJson';
 import { NewKesmas } from 'lib/models';
 import { generatePOSTData } from 'lib/utils';
+import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
@@ -81,6 +82,10 @@ export default function Kesmas ({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveKesmas() {
         try {
@@ -296,7 +301,7 @@ export default function Kesmas ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveKesmas} />}
+                        {editable && <ButtonSave clickHandler={saveKesmas} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>

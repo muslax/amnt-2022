@@ -1,6 +1,7 @@
 import fetchJson from 'lib/fetchJson';
 import { NewObservasi } from 'lib/models';
 import { generatePOSTData } from 'lib/utils';
+import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
@@ -53,6 +54,10 @@ export default function Observasi ({ idr, editable }) {
         
         return () => {}
     }, [data, setModel])
+    
+    function isDirty() {
+        return ! isEqual(model, data)
+    }
     
     async function saveObservasi() {
         try {
@@ -269,7 +274,7 @@ export default function Observasi ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveObservasi} />}
+                        {editable && <ButtonSave clickHandler={saveObservasi} dirty={isDirty()} />}
                     </Row>
                 </tbody>
             </table>
