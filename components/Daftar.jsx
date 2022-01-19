@@ -36,10 +36,11 @@ export default function DaftarResponden({ user }) {
 
 function Table ({ data, can = false }) {
     const [selected, setSelected] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
     
     async function deleteResponden() {
         if (!setSelected) return
-        
+        setSubmitting(true)
         try {
             await fetchJson(`/api/post?q=delete-responden&id=${selected}`, generatePOSTData({}))
             mutate(`/api/get?q=daftar`)
@@ -48,6 +49,7 @@ function Table ({ data, can = false }) {
         }
         
         setSelected(null)
+        setSubmitting(false)
     }
     
     if (data.length == 0) return (
@@ -64,7 +66,7 @@ function Table ({ data, can = false }) {
         <table className="w-full text-sm border-t-2 border-gray-600">
             <tbody>
             {data.map((r,i) => (
-                <tr key={`key-${i}`} className="border-b">
+                <tr key={`key-${i}`} className={submitting ? 'submitting opacity-40 border-b' : 'border-b'}>
                     <td className="p-2 w-8">{i + 1}</td>
                     <td className="p-2 w-24 whitespace-nowrap">{r.tanggal ? r.tanggal : '---'}</td>
                     <td className="p-2 w-1/3">
