@@ -179,8 +179,8 @@ export default function Observasi ({ idr, editable }) {
                         <Select 
                             target={model} setTarget={setModel} field="ventilasi" 
                             options={[
-                                'Kurang dari 10%',
-                                '10% atau lebih',
+                                'Kurang dari 10% dari luas lantai',
+                                '10% luas lantai atau lebih',
                             ]} 
                         />
                     </Row>

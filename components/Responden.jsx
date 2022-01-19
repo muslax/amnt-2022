@@ -204,10 +204,11 @@ export default function Responden ({ user, responden, editable }) {
                                 'Kurang dari 5 tahun',
                                 'Lebih dari 5 tahun',
                             ]} 
+                            effect={() => setModel(m => ({...m, asal: ''}))}
                         />
                     </Row>
                     <Row label="12b. Daerah asal:">
-                        <Textual model={model} setModel={setModel} field="asal" />
+                        <Textual model={model} setModel={setModel} field="asal" disabled={model.lamaTinggal.length < 12} />
                     </Row>
                     
                     <Row label="13a. Pekerjaan utama:">

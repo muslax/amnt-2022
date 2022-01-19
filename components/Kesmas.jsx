@@ -122,10 +122,11 @@ export default function Kesmas ({ idr, editable }) {
                                 'Ada',
                                 'Tidak ada',
                             ]} 
+                            effect={() => setModel(m => ({...m, infoStunting: ''}))}
                         />
                     </Row>
                     <Row label="- Penjelasan atau sebabnya:">
-                        <Textual model={model} setModel={setModel} field="infoStunting" />
+                        <Textual model={model} setModel={setModel} field="infoStunting" disabled={model.stunting != 'Ada'} />
                     </Row>
                     
                     <Row label="56.&nbsp;Wabah penyakit 5 tahun terakhir:">

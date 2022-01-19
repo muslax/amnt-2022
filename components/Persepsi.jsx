@@ -58,10 +58,11 @@ export default function Persepsi ({ idr, editable }) {
                                 'Sudah tahu',
                                 'Tidak tahu',
                             ]} 
+                            effect={() => setModel(m => ({...m, sumberTahu: ''}))}
                         />
                     </Row>
                     <Row label="- Sumber infomasi:">
-                        <Textual model={model} setModel={setModel} field="sumberTahu" />
+                        <Textual model={model} setModel={setModel} field="sumberTahu" disabled={model.tahuRencana != 'Sudah tahu'} />
                     </Row>
                     
                     <Row label="91. Manfaat umum:">

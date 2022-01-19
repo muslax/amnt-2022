@@ -53,6 +53,7 @@ export default function Ternak ({ idr, editable }) {
     }
     
     async function deleteItem(id) {
+        setSubmitting(true)
         try {
             await fetchJson(`/api/post?q=delete-ternak&id=${id}`, generatePOSTData(model))
             mutate(`/api/get?q=ternak&idr=${idr}`)
@@ -62,6 +63,7 @@ export default function Ternak ({ idr, editable }) {
         setAdd(false)
         setModel(null)
         setProxy(null)
+        setSubmitting(false)
     }
     
     return (

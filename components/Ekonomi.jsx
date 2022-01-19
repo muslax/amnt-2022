@@ -94,10 +94,11 @@ export default function Ekonomi ({ idr, editable }) {
                                 'Tidak bersedia',
                                 'Tidak tahu',
                             ]} 
+                            effect={() => setModel(m => ({...m, jenisPelatihan: ''}))}
                         />
                     </Row>
                     <Row label="16a. Jenis pelatihan yang diminati:">
-                        <Textual model={model} setModel={setModel} field="jenisPelatihan" />
+                        <Textual model={model} setModel={setModel} field="jenisPelatihan" disabled={model.minatPelatihan != 'Bersedia'} />
                     </Row>
                     
                     <tr><td colSpan="2" >&nbsp;</td></tr>
@@ -151,13 +152,17 @@ export default function Ekonomi ({ idr, editable }) {
                                 'Memiliki',
                                 'Tidak memiliki',
                             ]} 
+                            effect={() => {
+                                setModel(m => ({...m, jumlahTabungan: 0, tempatTabungan: ''}))
+                                // setModel(m => ({...m, tempatTabungan: ''}))
+                            }}
                         />
                     </Row>
                     <Row label="- Besar tabungan:">
-                        <Numerik model={model} setModel={setModel} field="jumlahTabungan" />
+                        <Numerik model={model} setModel={setModel} field="jumlahTabungan" disabled={model.tabungan != 'Memiliki'} />
                     </Row>
                     <Row label="- Tempat menabung:">
-                        <Textual model={model} setModel={setModel} field="tempatTabungan" />
+                        <Textual model={model} setModel={setModel} field="tempatTabungan" disabled={model.tabungan != 'Memiliki'} />
                     </Row>
                     
                     <tr><td colSpan="2" >&nbsp;</td></tr>
@@ -169,10 +174,11 @@ export default function Ekonomi ({ idr, editable }) {
                                 'Cukup',
                                 'Tidak cukup',
                             ]} 
+                            effect={() => setModel(m => ({...m, caraPemenuhanKebutuhan: ''}))}
                         />
                     </Row>
                     <Row label="- Cara memenuhi kebutuhan:">
-                        <Textual model={model} setModel={setModel} field="caraPemenuhanKebutuhan" />
+                        <Textual model={model} setModel={setModel} field="caraPemenuhanKebutuhan" disabled={model.kecukupanPendapatan != 'Tidak cukup'} />
                     </Row>
                     
                     <Row label="">

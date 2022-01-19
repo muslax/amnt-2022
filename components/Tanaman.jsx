@@ -39,6 +39,7 @@ export default function Tanaman ({ idr, editable }) {
     }
     
     async function saveItem() {
+        setSubmitting(true)
         try {
             await fetchJson(`/api/post?q=save-tanaman`, generatePOSTData(model))
             mutate(`/api/get?q=tanaman&idr=${idr}`)
@@ -48,6 +49,7 @@ export default function Tanaman ({ idr, editable }) {
         setAdd(false)
         setModel(null)
         setProxy(null)
+        setSubmitting(false)
     }
     
     async function deleteItem(id) {

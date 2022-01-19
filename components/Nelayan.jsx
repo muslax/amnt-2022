@@ -80,6 +80,29 @@ export default function Nelayan ({ idr, editable }) {
             
             <table className="w-full text-sm">
                 <tbody>
+                    <Row label="Apakah responden nelayan?">
+                        <select 
+                        className="w-full text-[14px] h-9 px-2 py-1"
+                        value={model.isNelayan}
+                        onChange={e => {
+                            const m = NewNelayan(idr)
+                            m.isNelayan = e.target.value == "true"
+                            setModel(m)
+                            // setModel(prev => ({
+                            //     ...prev,
+                            //     isNelayan: e.target.value,
+                            // }))
+                        }}
+                        >
+                            <option value="">-</option>
+                            <option value={false}>Responden bukan nelayan</option>
+                            <option value={true}>Responden adalah nelayan</option>
+                        </select>
+                    </Row>
+                    
+                    <tr><td colSpan={2} className='h-6'></td></tr>
+                </tbody>
+                <tbody className={model.isNelayan ? '' : 'hidden'}>
                     <Row label="36.&nbsp;Kebiasaan mencari ikan sehari-hari:">
                         <Select 
                             target={model} setTarget={setModel} field="polaMencari" 
@@ -241,7 +264,8 @@ export default function Nelayan ({ idr, editable }) {
                     <Row label="47.&nbsp;Harapan untuk pemerintah daerah:">
                         <Textual model={model} setModel={setModel} field="harapanUntukPemerintah" />
                     </Row>
-                    
+                </tbody>
+                <tbody>
                     <Row label="">
                         {editable && !submitting && <ButtonSave clickHandler={saveNelayan} dirty={isDirty()} />}
                         <ButtonSubmit submitting={submitting} />
