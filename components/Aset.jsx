@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import ButtonSubmit from './ButtonSubmit';
 import Multiple from './Multiple';
 import Numerik from './Numerik';
 import Row from "./Row";
@@ -16,6 +17,7 @@ export default function Aset({ idr, editable }) {
     const { mutate } = useSWRConfig()
     const { data, error } = useSWR(`/api/get?q=aset&id=${idr}`, fetchJson)
     const [model, setModel] = useState(NewAset('NEW'));
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -30,6 +32,7 @@ export default function Aset({ idr, editable }) {
     }
     
     async function saveAset() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-aset", generatePOSTData({
                 idr: idr,
@@ -39,6 +42,7 @@ export default function Aset({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -145,7 +149,8 @@ export default function Aset({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveAset} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveAset} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

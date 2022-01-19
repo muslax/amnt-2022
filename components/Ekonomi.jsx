@@ -11,11 +11,13 @@ import { generatePOSTData } from 'lib/utils';
 import ButtonSave from './ButtonSave';
 import isEqual from 'lodash.isequal';
 import useSWR, { useSWRConfig } from 'swr';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Ekonomi ({ idr, editable }) {
     const { mutate } = useSWRConfig()
     const { data, error } = useSWR(`/api/get?q=ekonomi&id=${idr}`, fetchJson)
     const [model, setModel] = useState(NewEkonomi('NEW'));
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -30,6 +32,7 @@ export default function Ekonomi ({ idr, editable }) {
     }
     
     async function saveEkonomi(e) {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-ekonomi", generatePOSTData({
                 idr: idr,
@@ -39,6 +42,8 @@ export default function Ekonomi ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        
+        setSubmitting(false)
     }
     
     return (
@@ -171,7 +176,8 @@ export default function Ekonomi ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveEkonomi} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveEkonomi} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

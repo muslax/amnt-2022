@@ -7,9 +7,11 @@ export default function NewName() {
     const router = useRouter()
     const [nama, setNama] = useState('')
     const [confirm, setConfirm] = useState(false)
+    const [submitting, setSubmitting] = useState(false);
     
     async function newName(e) {
         e.preventDefault();
+        setSubmitting(true)
         
         try {
             const rs = await fetchJson("/api/post?q=new-name", generatePOSTData({
@@ -20,6 +22,7 @@ export default function NewName() {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -43,8 +46,11 @@ export default function NewName() {
                     setConfirm(e.target.checked)
                 }}
                 />
-                <button disabled={! confirm} onClick={newName}
-                className="h-9 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white text-sm font-medium px-4">Create New Respondent</button>
+                {!submitting && <button disabled={! confirm} onClick={newName}
+                className="h-9 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white text-sm font-medium px-4">Create New Respondent</button>}
+                {submitting && <button disabled
+                className='submitting h-9 opacity-50 text--white text-sm font-medium px-8'
+                >Saving...</button>}
             </div>
         </div>
     )

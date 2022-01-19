@@ -26,7 +26,7 @@ export default function DataResponden () {
     
     // if (! user || ! user.isLoggedIn) return null;
     if (error) return <div>Failed to load</div>
-    if (!responden) return <div>Loading...</div>
+    if (!responden) return <div></div>
     
     return (
         <Layout title="Data Responden">

@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import ButtonSubmit from './ButtonSubmit';
 import Multiple from './Multiple';
 import Numerik from './Numerik';
 import Row from "./Row";
@@ -21,6 +22,7 @@ export default function Nelayan ({ idr, editable }) {
         lokasi2: '',
         lokasi3: '',
     });
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         let array = [];
@@ -59,6 +61,7 @@ export default function Nelayan ({ idr, editable }) {
     }
     
     async function saveNelayan() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-nelayan", generatePOSTData({
                 idr: idr,
@@ -68,6 +71,7 @@ export default function Nelayan ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -239,7 +243,8 @@ export default function Nelayan ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveNelayan} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveNelayan} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

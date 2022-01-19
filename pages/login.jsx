@@ -46,14 +46,14 @@ export default function LoginPage() {
       </Head>
 
       <main className="bg--yellow-50 flex flex-col items-center justify-center min-h-screen">
-        <div className="w-72 bg-white p-3">
-          <form onSubmit={handleSubmit}>
+        <div className="w-72 bg-white p-3 mb-40">
+          <form onSubmit={handleSubmit} className=''>
             <input
               type="text"
               name="username"
               required={true}
               placeholder="username"
-              className="w-full bg-blue-50 font-bold h-10 mb-3"
+              className="w-full bg-blue--50 font-bold h-10 mb-3"
             />
 
             <input
@@ -61,7 +61,7 @@ export default function LoginPage() {
               name="password"
               required={true}
               placeholder="password"
-              className="w-full bg-blue-50 font-bold h-10 mb-3"
+              className="w-full bg-blue--50 font-bold h-10 mb-3"
             />
             <div className={submitting
               ? "submitting h-1 bg-gray-200 mb-3"

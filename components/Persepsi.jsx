@@ -11,11 +11,13 @@ import Select from './Select';
 import Tanggal from './Tanggal';
 import Textual from './Textual';
 import isEqual from 'lodash.isequal';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Persepsi ({ idr, editable }) {
     const { mutate } = useSWRConfig()
     const { data, error } = useSWR(`/api/get?q=persepsi&id=${idr}`, fetchJson)
     const [model, setModel] = useState(NewPersepsi('NEW'));
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -30,6 +32,7 @@ export default function Persepsi ({ idr, editable }) {
     }
     
     async function savePersepsi() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-persepsi", generatePOSTData({
                 idr: idr,
@@ -39,6 +42,7 @@ export default function Persepsi ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -223,7 +227,8 @@ export default function Persepsi ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={savePersepsi} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={savePersepsi} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

@@ -14,6 +14,7 @@ import ButtonCancel from './ButtonCancel';
 import ButtonDelete from './ButtonDelete';
 import { NewHutan, NewIkan, NewTanaman, NewTernak } from 'lib/models';
 import isEqual from 'lodash.isequal';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Tanaman ({ idr, editable }) {
     const { data, error } = useSWR(`/api/get?q=tanaman&idr=${idr}`, fetchJson)
@@ -23,6 +24,7 @@ export default function Tanaman ({ idr, editable }) {
     const [proxy, setProxy] = useState(null);
     const [daftar, setDaftar] = useState([]);
     const [add, setAdd] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -70,7 +72,7 @@ export default function Tanaman ({ idr, editable }) {
                         <tr className="bg-gray-400 text-white whitespace-nowrap">
                             <td className="p-2">#</td>
                             <td className="p-2 border-l">Jenis</td>
-                            <td className="p-2 border-l">Luas lahan<br/>m<sup>2</sup></td>
+                            <td className="p-2 border-l">Luas lahan<br/>(hektar)</td>
                             <td className="p-2 border-l">Dikonsumsi<br/>kg/tahun</td>
                             <td className="p-2 border-l">Dijual<br/>kg/tahun</td>
                             <td className="p-2 border-l">Nilai jual<br/>Rp/tahun</td>
@@ -145,7 +147,8 @@ export default function Tanaman ({ idr, editable }) {
                     <Row label="">
                         <div className="flex">
                             <div className="flex-grow">
-                                <ButtonSave clickHandler={saveItem} dirty={isDirty()} />
+                                {!submitting && <ButtonSave clickHandler={saveItem} dirty={isDirty()} />}
+                                <ButtonSubmit submitting={submitting} />
                                 <ButtonCancel clickHandler={e => {
                                     setAdd(false)
                                     setModel(null)

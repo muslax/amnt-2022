@@ -13,6 +13,7 @@ import ButtonSave from './ButtonSave';
 import ButtonCancel from './ButtonCancel';
 import ButtonDelete from './ButtonDelete';
 import isEqual from 'lodash.isequal';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Anggota ({ idr, editable }) {
     const { data, error } = useSWR(`/api/get?q=anggota&idr=${idr}`, fetchJson)
@@ -22,6 +23,7 @@ export default function Anggota ({ idr, editable }) {
     const [proxy, setProxy] = useState(null);
     const [daftar, setDaftar] = useState([]);
     const [add, setAdd] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data && data.length > 0) {
@@ -208,7 +210,8 @@ export default function Anggota ({ idr, editable }) {
                     <Row label="">
                         <div className="flex">
                             <div className="flex-grow">
-                                <ButtonSave clickHandler={saveAnggota} dirty={isDirty()} />
+                                {!submitting && <ButtonSave clickHandler={saveAnggota} dirty={isDirty()} />}
+                                <ButtonSubmit submitting={submitting} />
                                 <ButtonCancel clickHandler={e => {
                                     setAdd(false)
                                     setModel(null)

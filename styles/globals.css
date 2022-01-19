@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-    
+       
     
 }
 body {
     @apply antialiased text-gray-700;
+}
+.submitting {
+    background-image: url('/mango-in-progress-01.gif');
 }

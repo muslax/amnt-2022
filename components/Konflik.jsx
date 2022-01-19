@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import ButtonSubmit from './ButtonSubmit';
 import Multiple from './Multiple';
 import Numerik from './Numerik';
 import Row from "./Row";
@@ -16,6 +17,7 @@ export default function Konflik ({ idr, editable }) {
     const { mutate } = useSWRConfig()
     const { data, error } = useSWR(`/api/get?q=konflik&id=${idr}`, fetchJson)
     const [model, setModel] = useState(NewKonflik('NEW'));
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -30,6 +32,7 @@ export default function Konflik ({ idr, editable }) {
     }
     
     async function saveKonflik() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-konflik", generatePOSTData({
                 idr: idr,
@@ -39,6 +42,7 @@ export default function Konflik ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -74,7 +78,8 @@ export default function Konflik ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveKonflik} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveKonflik} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

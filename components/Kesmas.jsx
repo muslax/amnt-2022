@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import ButtonSubmit from './ButtonSubmit';
 import Multiple from './Multiple';
 import Numerik from './Numerik';
 import Row from "./Row";
@@ -26,6 +27,7 @@ export default function Kesmas ({ idr, editable }) {
         wabah2: '',
         wabah3: '',
     });
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         let array = [];
@@ -88,6 +90,7 @@ export default function Kesmas ({ idr, editable }) {
     }
     
     async function saveKesmas() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-kesmas", generatePOSTData({
                 idr: idr,
@@ -97,6 +100,7 @@ export default function Kesmas ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -134,7 +138,7 @@ export default function Kesmas ({ idr, editable }) {
                         <Select 
                             target={model} setTarget={setModel} field="tempatBerobat" 
                             options={[
-                                'Puskemas',
+                                'Puskesmas',
                                 'Rumah sakit pemerintah',
                                 'Rumah sakit swasta',
                                 'Klinik',
@@ -269,6 +273,7 @@ export default function Kesmas ({ idr, editable }) {
                                 'WC umum',
                                 'WC di sungai/kolam',
                                 'Di kebun/ladang',
+                                'Di pantai/laut',
                                 'Lainnya',
                             ]} 
                         />
@@ -301,7 +306,8 @@ export default function Kesmas ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveKesmas} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveKesmas} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

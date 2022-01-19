@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import { useEffect, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
+import ButtonSubmit from './ButtonSubmit';
 import Multiple from './Multiple';
 import Numerik from './Numerik';
 import Row from "./Row";
@@ -22,6 +23,7 @@ export default function Observasi ({ idr, editable }) {
         swadaya2: '',
         swadaya3: '',
     });
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         let array = [];
@@ -60,6 +62,7 @@ export default function Observasi ({ idr, editable }) {
     }
     
     async function saveObservasi() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-observasi", generatePOSTData({
                 idr: idr,
@@ -69,6 +72,7 @@ export default function Observasi ({ idr, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -274,7 +278,8 @@ export default function Observasi ({ idr, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveObservasi} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveObservasi} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>

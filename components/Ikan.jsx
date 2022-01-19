@@ -14,6 +14,7 @@ import ButtonCancel from './ButtonCancel';
 import ButtonDelete from './ButtonDelete';
 import { NewHutan, NewIkan, NewTanaman, NewTernak } from 'lib/models';
 import isEqual from 'lodash.isequal';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Ikan ({ idr, editable }) {
     const { data, error } = useSWR(`/api/get?q=ikan&idr=${idr}`, fetchJson)
@@ -23,6 +24,7 @@ export default function Ikan ({ idr, editable }) {
     const [proxy, setProxy] = useState(null);
     const [daftar, setDaftar] = useState([]);
     const [add, setAdd] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     
     useEffect(() => {
         if (data) {
@@ -37,6 +39,7 @@ export default function Ikan ({ idr, editable }) {
     }
     
     async function saveItem() {
+        setSubmitting(true)
         try {
             await fetchJson(`/api/post?q=save-ikan`, generatePOSTData(model))
             mutate(`/api/get?q=ikan&idr=${idr}`)
@@ -46,6 +49,7 @@ export default function Ikan ({ idr, editable }) {
         setAdd(false)
         setModel(null)
         setProxy(null)
+        setSubmitting(false)
     }
     
     async function deleteItem(id) {
@@ -145,7 +149,8 @@ export default function Ikan ({ idr, editable }) {
                     <Row label="">
                         <div className="flex">
                             <div className="flex-grow">
-                                <ButtonSave clickHandler={saveItem} dirty={isDirty()} />
+                                {!submitting && <ButtonSave clickHandler={saveItem} dirty={isDirty()} />}
+                                <ButtonSubmit submitting={submitting} />
                                 <ButtonCancel clickHandler={e => {
                                     setAdd(false)
                                     setModel(null)

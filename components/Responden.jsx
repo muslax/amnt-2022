@@ -11,10 +11,12 @@ import { generatePOSTData } from 'lib/utils';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
 import isEqual from 'lodash.isequal';
+import ButtonSubmit from './ButtonSubmit';
 
 export default function Responden ({ user, responden, editable }) {
     const [model, setModel] = useState(responden);
     const [enums, setEnums] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
     const { data, error } = useSWR(`/api/get?q=enums`, fetchJson)
     
     const { mutate } = useSWRConfig()
@@ -38,7 +40,7 @@ export default function Responden ({ user, responden, editable }) {
     
     async function saveResponden(e) {
         e.preventDefault();
-        
+        setSubmitting(true)
         try {
             // Umur
             if (Date.parse(model.tanggalLahir)) {
@@ -54,6 +56,7 @@ export default function Responden ({ user, responden, editable }) {
         } catch (error) {
             alert("ERROR")
         }
+        setSubmitting(false)
     }
     
     return (
@@ -221,7 +224,8 @@ export default function Responden ({ user, responden, editable }) {
                     </Row>
                     
                     <Row label="">
-                        {editable && <ButtonSave clickHandler={saveResponden} dirty={isDirty()} />}
+                        {editable && !submitting && <ButtonSave clickHandler={saveResponden} dirty={isDirty()} />}
+                        <ButtonSubmit submitting={submitting} />
                     </Row>
                 </tbody>
             </table>
