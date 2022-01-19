@@ -38,6 +38,7 @@ export default function Anggota ({ idr, editable }) {
     }
     
     async function saveAnggota() {
+        setSubmitting(true)
         try {
             await fetchJson("/api/post?q=save-anggota", generatePOSTData(model))
             mutate(`/api/get?q=anggota&idr=${idr}`)
@@ -47,6 +48,7 @@ export default function Anggota ({ idr, editable }) {
         // setDaftar(prev => ([...prev, model]));
         setAdd(false)
         setModel(null)
+        setSubmitting(false)
     }
     
     async function deleteAnggota(id) {
