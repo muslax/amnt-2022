@@ -7,6 +7,7 @@ import { generatePOSTData } from 'lib/utils';
 
 export default function DaftarResponden({ user }) {
     const { data, error } = useSWR(`/api/get?q=daftar`, fetchJson)
+    const { data:progress, error:progressError } = useSWR(`/api/get?q=per-enum`, fetchJson)
     
     const [mine, setMine] = useState([]);
     
@@ -17,10 +18,36 @@ export default function DaftarResponden({ user }) {
     }, [data, setMine, user])
     
     if (error) return <div>ERROR</div>
-    if (!data) return <div>NO DATA</div>
+    if (!data || !progress) return <div>NO DATA</div>
     
     return (
         <>
+            <div className="mt-16 mb-20 border border-gray-400 px-4 pt-2 pb-4">
+                <div className="flex flex-col sm:flex-row">
+                    <div className="w-full sm:w-1/2 sm:pr-3">
+                        <h2 className="text-sm font-bold mb-2">Per Enumerator</h2>
+                        {progress.perenum.map(p => (
+                            <p key={p._id} className="flex items=center text-sm border-t last:border-b border-gray-300 py-1">
+                                <span className="flex-grow">{p.fullname}</span>
+                                <span className="fopnt-bold">{p.responden}</span>
+                            </p>
+                        ))}
+                    </div>
+                    <div className="w-full sm:w-1/2 sm:pl-3">
+                        <h2 className="text-sm font-bold mb-2 mt-4 sm:mt-0">
+                            Per Desa
+                            <span className="text-xs text-red-500 font-normal ml-2">Desa yang kosong tidak dihitung</span>
+                        </h2>
+                        {progress.perdesa.map(p => (
+                            <p key={p._id} className="flex items=center text-sm border-t last:border-b border-gray-300 py-1">
+                                <span className="flex-grow">{p.nama}</span>
+                                <span className="fopnt-bold">{p.responden}</span>
+                            </p>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            
             <div className="mt-16 mb-20">
                 <h2 className="text-lg font-bold">My Data</h2>
                 <Table data={mine} can={true} />
@@ -30,6 +57,8 @@ export default function DaftarResponden({ user }) {
                 <h2 className="text-lg font-bold">All Data</h2>
                 <Table data={data} />
             </div>
+            
+            {/* <pre className='text-[11px]'>{JSON.stringify(progress, null, 2)}</pre> */}
         </>
     )
 }
@@ -66,7 +95,7 @@ function Table ({ data, can = false }) {
         <table className="w-full text-sm border-t-2 border-gray-600">
             <tbody>
             {data.map((r,i) => (
-                <tr key={`key-${i}`} className={submitting ? 'submitting opacity-40 border-b' : 'border-b'}>
+                <tr key={`key-${i}`} className={submitting && r._id == selected ? 'submitting opacity-40 border-b' : 'border-b'}>
                     <td className="p-2 w-8">{i + 1}</td>
                     <td className="p-2 w-24 whitespace-nowrap">{r.tanggal ? r.tanggal : '---'}</td>
                     <td className="p-2 w-1/3">

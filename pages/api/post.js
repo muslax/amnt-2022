@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import withSession from "lib/session";
 import { connect } from "lib/mongodb";
 import { ModelResponden, NewAnggota, NewAset, NewEkonomi, NewKesmas, NewKonflik, NewNelayan, NewObservasi, NewPersepsi, NewResponden } from "lib/models";
+import moment from "moment-timezone";
 
 const ACCEPTED_QUERIES = {}
 
@@ -34,8 +35,17 @@ ACCEPTED_QUERIES['new-name'] = async function (req, res) {
         const user = req.session.get("user");
         const { nama } = req.body
         const id = ObjectId().toString()
+        
+        // Date
+        const now = new Date();
+        const wita = moment.tz(now.toISOString(), 'Asia/Makassar').format();
+        
+        
         const model = NewResponden(nama, user)
         model._id = id
+        model.created = wita.substring(0, 10) // yyyy-mm-dd
+        model.entry = user.fullname
+        model.enumerator = user.fullname
         
         await session.withTransaction(async () => {
             await db.collection('responden').insertOne(model)
@@ -67,29 +77,20 @@ ACCEPTED_QUERIES['save-responden'] = async function (req, res) {
         await session.withTransaction(async () => {
             const user = req.session.get("user");
             const { _id } = req.body
+            const fields = req.body
+            delete fields._id
+            
+            // For old entries which have no created date
+            if (! fields.created) {
+                const now = new Date();
+                const wita = moment.tz(now.toISOString(), 'Asia/Makassar').format();
+                fields.created = wita
+            }
+            
+            console.log('req.body', fields)
             await db.collection('responden').findOneAndUpdate(
                 { _id: _id },
-                { $set: {
-                    tanggal: req.body.tanggal,
-                    enumerator: req.body.enumerator,
-                    desa: req.body.desa,
-                    gender: req.body.gender,
-                    nama: req.body.nama,
-                    tanggalLahir: req.body.tanggalLahir,
-                    umur: req.body.umur,
-                    statusKeluarga: req.body.statusKeluarga,
-                    statusMarital: req.body.statusMarital,
-                    pendidikan: req.body.pendidikan,
-                    jumlahKlgSerumah: req.body.jumlahKlgSerumah,
-                    jumlahOrangSerumah: req.body.jumlahOrangSerumah,
-                    agama: req.body.agama,
-                    suku: req.body.suku,
-                    bahasa: req.body.bahasa,
-                    lamaTinggal: req.body.lamaTinggal,
-                    asal: req.body.asal,
-                    pekerjaanUtama: req.body.pekerjaanUtama,
-                    pekerjaanLain: req.body.pekerjaanLain,
-                }}
+                { $set: fields }
             );
             
             const found = await db.collection('anggota').findOne({ _id: _id })

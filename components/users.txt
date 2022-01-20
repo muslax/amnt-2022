@@ -1,0 +1,85 @@
+TIM LOKAL
+=========
+
+"fullname": "Muhammad Nursan, S.P.,M.Si",
+"username": "nursan",
+"xfpwd": "171095"
+
+"fullname": "Sukarne, S.Pt.,M.Si",
+"username": "sukarne",
+"xfpwd": "308598"
+
+"fullname": "Rahmawati, ST.,MM",
+"username": "rahmawati",
+"xfpwd": "187875"
+
+"fullname": "Sahratullah",
+"username": "sahratullah",
+"xfpwd": "616405"
+
+"fullname": "Dewi Seprianingsih",
+"username": "dewi",
+"xfpwd": "964650"
+
+"fullname": "Erlin Pebriantika, M.Pd",
+"username": "erlin",
+"xfpwd": "580085"
+
+"fullname": "Rizka Donny Agung Saputra",
+"username": "rizka",
+"xfpwd": "291257"
+
+"fullname": "Akhairuddin, M.Pd",
+"username": "akhairuddin",
+"xfpwd": "791190"
+
+"fullname": "Lidiawati, SE.Sy.,MM",
+"username": "lidiawati",
+"xfpwd": "600315"
+
+"fullname": "Eko Supriastuti SP., M.Si",
+"username": "eko",
+"xfpwd": "617541"
+
+"fullname": "Fitri Rahmawati, S.Pd., M.Pd.",
+"username": "fitri",
+"xfpwd": "773695"
+
+"fullname": "Amrussalam, M.T",
+"username": "amrussalam",
+"xfpwd": "873138"
+
+"fullname": "Halikin",
+"username": "halikin",
+"xfpwd": "751731"
+
+"fullname": "Tilal Afian",
+"username": "tilal",
+"xfpwd": "492377"
+
+"fullname": "Ariesta Ramdhani, S.T., M.Ec.Dev.",
+"username": "ariesta",
+"xfpwd": "675226"
+
+TIM YOGYA
+=========
+
+"fullname": "Kurnia Fahmy",
+"username": "kurnia",
+"xfpwd": "364252"
+
+"fullname": "Banu Iqra W",
+"username": "banu",
+"xfpwd": "389865"
+
+"fullname": "Shidiq Hutomo",
+"username": "shidiq",
+"xfpwd": "419165"
+
+"fullname": "Halimi Fathan",
+"username": "halimi",
+"xfpwd": "552533"
+
+"fullname": "Nuridin",
+"username": "nuridin",
+"xfpwd": "255101"

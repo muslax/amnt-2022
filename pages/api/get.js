@@ -28,6 +28,17 @@ export default withSession(async (req, res) => {
 })
 
 
+ACCEPTED_QUERIES['desa'] = async function (req, res) {
+  try {
+    const { db } = await connect();
+    const { idr } = req.query;
+    const rs = await db.collection('desa').find().toArray();
+    return res.json( rs );
+  } catch (error) {
+    return res.status(error.status || 500).end(error.message)
+  }
+}
+
 
 ACCEPTED_QUERIES['enums'] = async function (req, res) {
   try {
@@ -40,41 +51,66 @@ ACCEPTED_QUERIES['enums'] = async function (req, res) {
   }
 }
 
+ACCEPTED_QUERIES['per-enum'] = async function (req, res) {
+  const { db, client } = await connect();
+  const session = client.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const perenum = await db.collection('users').aggregate([
+        {$match: {type: "enumerator"}},
+        {$lookup: {from:"responden", localField:"fullname", foreignField:"entry", as:"data"}},
+        {$project: {fullname: 1, responden: {$size: "$data"}}}
+      ]).toArray()
+      
+      const perdesa = await db.collection('desa').aggregate([
+        {$lookup: {from:"responden", localField:"nama", foreignField:"desa", as:"data"}},
+        {$project: {nama: 1, responden: {$size: "$data"}}}
+      ]).toArray()
+      
+      return res.json({ perenum, perdesa })
+    })
+  } catch (error) {
+    return res.status(error.status || 500).end(error.message)
+  }
+}
+
 ACCEPTED_QUERIES['daftar'] = async function (req, res) {
     try {
         const user = req.session.get("user");
         const { db } = await connect();
         const { id } = req.query;
         
-        // const rs = await db.collection('responden').aggregate([
-        //     { $match: {}},
-        //     { $lookup: {
-        //         from: 'users',
-        //         localField: '_user',
-        //         foreignField: '_id',
-        //         as: 'user'
-        //     }},
-        //     { $unwind: "$user" },
-        //     { $project: {
+        const rs = await db.collection('responden').aggregate([
+            { $match: {}},
+            { $lookup: {
+                from: 'users',
+                localField: '_user',
+                foreignField: '_id',
+                as: 'user'
+            }},
+            { $unwind: "$user" },
+            { $project: {
+                _user: 1,
+                nama: 1,
+                created: 1,
+                desa: 1,
+                tanggal: 1,
+                enumerator: 1,
+                "user.fullname": 1,
+                // 'enumerator': "$user.fullname",
+            }}
+        ]).toArray()
+
+        // const rs = await db.collection('responden').find(
+        //     {},
+        //     { projection: {
         //         _user: 1,
         //         nama: 1,
         //         desa: 1,
         //         tanggal: 1,
-        //         // "user.fullname": 1,
-        //         'enumerator': "$user.fullname",
+        //         enumerator: 1,
         //     }}
-        // ]).toArray()
-
-        const rs = await db.collection('responden').find(
-            {},
-            { projection: {
-                _user: 1,
-                nama: 1,
-                desa: 1,
-                tanggal: 1,
-                enumerator: 1,
-            }}
-        ).toArray()
+        // ).toArray()
 
         return res.json( rs );
     } catch (error) {

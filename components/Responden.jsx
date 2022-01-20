@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
-import Multiple from './Multiple';
-import Numerik from './Numerik';
 import Row from "./Row";
 import Select from './Select';
 import Tanggal from './Tanggal';
 import Textual from './Textual';
-import { ModelResponden } from 'lib/models';
 import fetchJson from 'lib/fetchJson';
-import { generatePOSTData } from 'lib/utils';
+import { generatePOSTData, getNextEnv } from 'lib/utils';
 import useSWR, { useSWRConfig } from 'swr';
 import ButtonSave from './ButtonSave';
 import isEqual from 'lodash.isequal';
 import ButtonSubmit from './ButtonSubmit';
 
 export default function Responden ({ user, responden, editable }) {
+    const { data, error } = useSWR(`/api/get?q=enums`, fetchJson)
+    const { data: daftarDesa, error: desaError } = useSWR(`/api/get?q=desa`, fetchJson)
+    
     const [model, setModel] = useState(responden);
     const [enums, setEnums] = useState([]);
+    const [desa, setDesa] = useState([]);
     const [submitting, setSubmitting] = useState(false);
-    const { data, error } = useSWR(`/api/get?q=enums`, fetchJson)
     
     const { mutate } = useSWRConfig()
     
@@ -31,8 +31,14 @@ export default function Responden ({ user, responden, editable }) {
             setEnums(array)
         }
         
+        if (daftarDesa) {
+            let array = []
+            for (var i in daftarDesa) array.push(daftarDesa[i].nama)
+            setDesa(array)
+        }
+        
         return () => {}
-    }, [data, setEnums])
+    }, [data, daftarDesa, setEnums, setDesa])
     
     function isDirty() {
         return ! isEqual(model, responden)
@@ -74,13 +80,22 @@ export default function Responden ({ user, responden, editable }) {
                         />
                     </Row>
                     
+                    {getNextEnv() == 'development' && (
+                        <Row label="Data entri:">
+                            <Select 
+                            target={model} setTarget={setModel} field="entry" defaultValue={user.fullname}
+                            options={enums} 
+                            />
+                        </Row>
+                    )}
+                    
                     <Row label="1. Nama lengkap:">
                         <Textual model={model} setModel={setModel} field="nama" />
                     </Row>
                     <Row label="2. Desa:">
                         <Select 
                             target={model} setTarget={setModel} field="desa" 
-                            options={daftarDesa} 
+                            options={desa} 
                         />
                     </Row>
                     <Row label="3. Jenis kelamin:">
@@ -230,54 +245,13 @@ export default function Responden ({ user, responden, editable }) {
                     </Row>
                 </tbody>
             </table>
-            {/* <pre className="text-xs">{JSON.stringify(model, null, 2)}</pre> */}
+            
+            {/* <div className="flex my-5 text-[11px] text-red-500">
+                <pre className="w-1/2 pr-4 overflow-auto">{JSON.stringify(model, null, 2)}</pre>
+                <pre className="w-1/2 pr-4 overflow-auto">{JSON.stringify(responden, null, 2)}</pre>
+            </div> */}
         </div>
     )
-}
-
-function newModel() {
-    return {
-        _id: '',
-        _user: '',
-        tanggal: '',
-        desa: '',
-        gender: '',
-        nama: '',
-        tanggalLahir: '',
-        statusKeluarga: '',
-        statusMarital: '',
-        pendidikan: '',
-        jumlahKlgSerumah: '',
-        jumlahOrangSerumah: '',
-        agama: '',
-        suku : '',
-        bahasa: '',
-        lamaTinggal: '',
-        asal: '',
-        pekerjaanUtama: '',
-        pekerjaanLain: '',
-        minatKerjaDiAMNT: '',
-        pernahMelamarAMNT: '',
-        minatPelatihan: '',
-        jenisPelatihan: '',
-        pendapatanPerBulan: '',
-        sumberPendapatan: [],
-        belanjaPerBulan: '',
-        belanjaKonsumsi: '',
-        belanjaKesehatan: '',
-        belanjaPendidikan: '',
-        belanjaKomunikasi: '',
-        belanjaTransportasi: '',
-        belanjaSewaRumah: '',
-        belanjaListrik: '',
-        belanjaCicilan: '',
-        belanjaLainnya: '',
-        tabungan: '',
-        jumlahTabungan: '',
-        tempatTabungan: '',
-        kecukupanPendapatan: '',
-        caraPemenuhanKebutuhan: '',
-    }
 }
 
 const sumberPendapatan = [
@@ -312,23 +286,4 @@ const jenisPekerjaan = [
     'Ibu rumah tangga',
     'Pensiunan',
     'Lainnya',
-]
-
-const daftarDesa = [
-    'Sekongkang bawah',
-    'Sekongkang atas',
-    'Tongo',
-    'Ai Kangkung',
-    'Tatar',
-    'Talonang baru',
-    'Kemuning',
-    'Maluk',
-    'Benete',
-    'Bukit damai',
-    'Mantun',
-    'Pasir putih',
-    'Belo',
-    'Beru',
-    'Goa',
-    'Dasan anyar',
 ]
