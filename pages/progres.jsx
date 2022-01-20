@@ -6,4 +6,7 @@ export default function Progres () {
     const { user } = useUser({ redirectTo: '/login' });
     const { data, error } = useSWR(`/api/get?q=progress`, fetchJson)
     
+    return (
+        <div></div>
+    )
 }
