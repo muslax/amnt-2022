@@ -67,7 +67,10 @@ export default function Responden ({ user, responden, editable }) {
     
     return (
         <div className="my-10">
-            <h3 className="text-blue-500 font-bold mb-3">Responden</h3>
+            <h3 className="text-blue-500 font-bold mb-3">
+                Responden{` `}
+                <span className='text-red-600'>{model._id}</span>
+            </h3>
             <table className="w-full text-sm">
                 <tbody>
                     <Row label="Tanggal wawancara:">

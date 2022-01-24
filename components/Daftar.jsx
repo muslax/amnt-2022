@@ -96,7 +96,8 @@ function Table ({ data, can = false }) {
             <tbody>
             {data.map((r,i) => (
                 <tr key={`key-${i}`} className={submitting && r._id == selected ? 'submitting opacity-40 border-b' : 'border-b'}>
-                    <td className="p-2 w-8">{i + 1}</td>
+                    <td className="p-2 w-6">{i + 1}</td>
+                    <td className="p-2 w-8">{r._id}</td>
                     <td className="p-2 w-24 whitespace-nowrap">{r.tanggal ? r.tanggal : '---'}</td>
                     <td className="p-2 w-1/3">
                         {can && (
@@ -114,7 +115,7 @@ function Table ({ data, can = false }) {
                         </Link>
                     </td>
                     <td className="p-2">{r.desa}</td>
-                    {! can && <td className="p-2">{r.enumerator}</td> }
+                    {/* {! can && <td className="p-2">{r.enumerator}</td> } */}
                     {can && (
                         <td className="p-1 text-right">
                                 <button
